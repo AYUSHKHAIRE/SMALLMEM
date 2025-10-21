@@ -1,0 +1,5 @@
+qdrant_storage/
+uploads/
+venv/
+__pycache__/
+*.pyc
