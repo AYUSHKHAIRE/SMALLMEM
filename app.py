@@ -3,8 +3,7 @@ from pre_processing.pdf import PDFProcessor
 from RAG.pre_processor import Chunker
 from RAG.embeding import Embedder
 from LLM.conversation import ConversationChain
-from LLM.gemma_local import GemmaManager
-import json
+from LLM.docker_model import dockerModel 
 from config.logger_config import logger
 
 app_progress_text =  "Loading the app..."
@@ -28,8 +27,14 @@ if "CK" not in st.session_state:
 if "CC" not in st.session_state:
     st.session_state.CC = ConversationChain()
     app_my_bar.progress(80, text="Loading conversation chain...")
-if "GM" not in st.session_state:
-    st.session_state.GM = GemmaManager()
+if "DM" not in st.session_state:
+    st.session_state.DM = dockerModel(
+        model="ai/granite-4.0-h-tiny:7B",
+        hostname="localhost",
+        port=12434,
+        stream=True,
+        system_prompt="You are a helpful assistant."
+    )
     app_my_bar.progress(100, text="App loaded successfully!")
 
 app_my_bar.progress(100, text="App loaded successfully!")
@@ -40,7 +45,7 @@ EB = st.session_state.EB
 PP = st.session_state.PP
 CK = st.session_state.CK
 CC = st.session_state.CC
-GM = st.session_state.GM
+DM = st.session_state.DM
 
 col_3, col_4 = st.columns([6, 1])
 with col_3:
@@ -133,7 +138,7 @@ if ask_button and question:
         response_placeholder = st.empty()
         answer_text = ""
 
-        for chunk in GM.ask_query(prompt):
+        for chunk in DM.ask_query(prompt):
             answer_text += chunk
             response_placeholder.markdown(answer_text)
 
