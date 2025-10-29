@@ -21,7 +21,7 @@ class ConversationChain:
 
     def get_all_messages(self):
         """Return full conversation history."""
-        return self.messages
+        return self.messages.reverse()
 
     def get_recent_messages(self):
         """Return only the recent N messages."""
