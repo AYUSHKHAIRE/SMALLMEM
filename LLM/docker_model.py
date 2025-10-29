@@ -32,7 +32,7 @@ class dockerModel:
                 "messages": [{"role": "user", "content": "ping"}]
             }
             response = requests.post(url, headers={"Content-Type": "application/json"},
-                                     data=json.dumps(payload), timeout=3)
+                                     data=json.dumps(payload), timeout=15)
             return response.status_code == 200
         except requests.exceptions.RequestException as e:
             logger.error(f"Health check failed: {e}")
