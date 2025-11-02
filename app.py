@@ -5,7 +5,7 @@ from RAG.embeding import Embedder
 from LLM.conversation import ConversationChain
 from LLM.docker_model import dockerModel 
 from config.logger_config import logger
-
+import os
 # -----------------------------------------
 # INITIAL LOADING
 # -----------------------------------------
@@ -104,6 +104,16 @@ with st.sidebar:
 # -----------------------------------------
 # CHAT SECTION
 # -----------------------------------------
+
+app_my_bar = st.progress(0, text=app_progress_text)
+
+if uploaded_files:
+    tabs = st.tabs([f.name for f in uploaded_files])
+    for i, (tab, uploaded_file) in enumerate(zip(tabs, uploaded_files)):
+        with tab:
+            file_path = os.path.join("uploads", uploaded_file.name)
+            st.pdf(file_path)
+
 st.subheader("💬 Chat with your PDF")
 
 # Retrieve all previous messages (preserving order)
@@ -125,6 +135,8 @@ if question and not st.session_state.generating:
         st.session_state.generating = True
         st.session_state.CC.add_message(question, "user")
 
+        chat_history = st.session_state.CC.get_formatted_context()
+
         with st.chat_message("user"):
             st.markdown(question)
 
@@ -136,45 +148,39 @@ if question and not st.session_state.generating:
             query_embedding = EB.get_user_query_embedding(question)
 
             LLM_answer_bar.progress(30, text="Retrieving relevant chunks...")
-            top_k_scores, top_k_texts = EB.get_similar_chunks(query_embedding, top_k=10)
+            top_k_scores, top_k_texts = EB.get_similar_chunks(query_embedding, top_k=20)
             final_context = "\n\n\n".join(top_k_texts)
 
             LLM_answer_bar.progress(60, text="Generating response...")
             prompt = f"""
-                You are a knowledgeable and helpful AI assistant.
+                    You are a friendly and intelligent AI assistant.
 
-                Your task is to answer the user's question as accurately and clearly as possible.
+                    You are given:
+                    - A user question.
+                    - Optional context extracted from uploaded documents.
 
-                You are provided with:
-                - A *question* from the user.
-                - A *context* extracted from uploaded documents.
+                    ---
 
-                ---
+                    ### Guidelines:
+                    1. If the question is conversational (like greetings, feelings, or casual chat), respond naturally and briefly as a person would.
+                    - Example: If asked "How are you?", reply like "I'm good! How about you?" instead of analyzing the context.
+                    2. If the question clearly relates to the provided context, use the context to give a correct and concise answer.
+                    3. If the question is unrelated to the context, ignore the context and answer normally using general knowledge.
+                    4. Keep your tone warm, simple, and human-like.
 
-                ### Instructions:
-                1. **Check relevance**:
-                - If the question is clearly related to the given context, use the *context* to provide a detailed and well-structured answer.
-                - If the question is **not related** to the context, ignore the context and answer it as a **general knowledge question**.
+                    ---
 
-                2. **When using the context**:
-                - Be factual and concise.
-                - Do not invent details not supported by the context.
+                    **Question:** {question}
 
-                3. **When not using the context**:
-                - Give a thoughtful, general response based on your world knowledge.
-                - Optionally mention that the question seems unrelated to the provided documents.
+                    **Context (optional):**
+                    {final_context}
 
-                ---
+                    History until now
+                    {chat_history}                    
+                    ---
 
-                **Question:** {question}
-
-                **Context from Documents:**
-                {final_context}
-
-                ---
-
-                Provide your final answer below in a clear and human-like manner.
-                """
+                    **Answer:**
+                    """
 
             for chunk in DM.ask_query(prompt):
                 answer_text += chunk
@@ -183,4 +189,6 @@ if question and not st.session_state.generating:
             LLM_answer_bar.progress(100, text="Answer generated successfully!")
             st.session_state.CC.add_message(answer_text, "assistant")
             st.session_state.generating = False
-            st.balloons()
+
+else:
+    st.info("Upload PDFs to preview them in tabs.")
