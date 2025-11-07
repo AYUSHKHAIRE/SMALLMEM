@@ -53,7 +53,7 @@ class DataLoader:
         # Merge contexts into ~1000 combined ones
         unique_contexts = df["context"].drop_duplicates().tolist()
         num_contexts = len(unique_contexts)
-        target = 1000
+        target = 2000
         merge_size = math.ceil(num_contexts / target)
 
         merged_contexts = [
