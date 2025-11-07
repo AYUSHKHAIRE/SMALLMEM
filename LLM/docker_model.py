@@ -60,32 +60,34 @@ class dockerModel:
             stream=self.stream is not None
         )
 
-        if self.stream:
-            for line in response.iter_lines():
-                if not line:
-                    continue
-
-                decoded_line = line.decode("utf-8").strip()
-                if not decoded_line.startswith("data:"):
-                    continue
-
-                payload = decoded_line[len("data: "):].strip()
-
-                # Stop signal from server
-                if payload == "[DONE]":
-                    break
-
-                try:
-                    content = json.loads(payload)
-                except json.JSONDecodeError:
-                    logger.warning(f"Invalid JSON chunk: {payload}")
-                    continue
-
-                # Sometimes we get role-only updates or empty deltas
-                delta = content.get("choices", [{}])[0].get("delta", {})
-                text_piece = delta.get("content")
-                if text_piece:
-                    yield text_piece  # Stream partial output
-        else:
+        # If streaming is disabled — normal JSON response
+        if not self.stream:
             resp_json = response.json()
             return resp_json["choices"][0]["message"]["content"]
+
+        # --- Otherwise, collect streamed chunks into final string ---
+        final_output = ""
+        for line in response.iter_lines():
+            if not line:
+                continue
+
+            decoded_line = line.decode("utf-8").strip()
+            if not decoded_line.startswith("data:"):
+                continue
+
+            payload = decoded_line[len("data: "):].strip()
+            if payload == "[DONE]":
+                break
+
+            try:
+                content = json.loads(payload)
+            except json.JSONDecodeError:
+                logger.warning(f"Invalid JSON chunk: {payload}")
+                continue
+
+            delta = content.get("choices", [{}])[0].get("delta", {})
+            text_piece = delta.get("content")
+            if text_piece:
+                final_output += text_piece
+
+        return final_output
