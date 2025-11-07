@@ -4,3 +4,4 @@ venv/
 __pycache__/
 *.pyc
 Evaluation/SQuAD2/data/
+Evaluation/SQuAD2/results/
