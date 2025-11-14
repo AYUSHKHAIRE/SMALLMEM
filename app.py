@@ -6,17 +6,21 @@ from LLM.conversation import ConversationChain
 from LLM.docker_model import dockerModel 
 from config.logger_config import logger
 import os
+from Indexer.conccontx import ConcentratedContext
+
 # -----------------------------------------
 # INITIAL LOADING
 # -----------------------------------------
-st.set_page_config(page_title="RAG Assistant", layout="wide")
+st.set_page_config(page_title="RAG vs CCX Comparison", layout="wide")
 
-app_progress_text = "Loading the app..."
+st.title("📘 RAG vs CCX — Side by Side Answer Comparison")
+
+app_progress_text = "Loading components..."
 col1, col2 = st.columns([1, 1]) 
 with col1:
     app_my_bar = st.progress(0, text=app_progress_text)
 with col2:
-    LLM_answer_bar = st.progress(0, text="Waiting for question...")
+    LLM_answer_bar = st.progress(0, text="Waiting for input...")
 
 # --- Initialize persistent objects ---
 if "EB" not in st.session_state:
@@ -27,14 +31,6 @@ if "PP" not in st.session_state:
     st.session_state.PP = PDFProcessor()
     app_my_bar.progress(40, text="Loading PDF processor...")
 
-if "CK" not in st.session_state:
-    st.session_state.CK = Chunker()
-    app_my_bar.progress(60, text="Loading text chunker...")
-
-if "CC" not in st.session_state:
-    st.session_state.CC = ConversationChain()
-    app_my_bar.progress(80, text="Loading conversation chain...")
-
 if "DM" not in st.session_state:
     st.session_state.DM = dockerModel(
         model="ai/granite-4.0-h-tiny:7B",
@@ -43,7 +39,19 @@ if "DM" not in st.session_state:
         stream=True,
         system_prompt="You are a helpful assistant."
     )
-    app_my_bar.progress(100, text="App loaded successfully!")
+    app_my_bar.progress(55, text="Loading LLM (Docker)...")
+
+if "CK" not in st.session_state:
+    st.session_state.CK = Chunker()
+    app_my_bar.progress(70, text="Loading chunker...")
+
+if "CC" not in st.session_state:
+    st.session_state.CC = ConversationChain()
+    app_my_bar.progress(85, text="Loading conversation chain...")
+
+if "CCX" not in st.session_state:
+    st.session_state.CCX = ConcentratedContext(name="collection")
+    app_my_bar.progress(95, text="Loading concentrated context...")
 
 if "generating" not in st.session_state:
     st.session_state.generating = False
@@ -51,27 +59,28 @@ if "generating" not in st.session_state:
 if "embeddings_ready" not in st.session_state:
     st.session_state.embeddings_ready = False
 
-app_my_bar.progress(100, text="App loaded successfully!")
+app_my_bar.progress(100, text="App ready!")
 
 EB = st.session_state.EB
 PP = st.session_state.PP
 CK = st.session_state.CK
 CC = st.session_state.CC
 DM = st.session_state.DM
+CCX = st.session_state.CCX
 
 # -----------------------------------------
 # SIDEBAR - PDF UPLOAD
 # -----------------------------------------
 with st.sidebar:
-    st.subheader("Upload PDF files and click on 'Process'")
+    st.subheader("📄 Upload PDF files")
     uploaded_files = st.file_uploader("Choose PDF files", type="pdf", accept_multiple_files=True)
-    button = st.button("Process", key="process_button")
+    button = st.button("Process PDFs")
 
-    pdf_processor_bar = st.progress(0, text="Waiting for files to process...")
+    pdf_processor_bar = st.progress(0, text="Waiting...")
 
     if button:
         if uploaded_files:
-            pdf_processor_bar.progress(25, text="Files uploaded. Starting processing...")
+            pdf_processor_bar.progress(25, text="Reading PDFs...")
             full_md_text = []
 
             for uploaded_file in uploaded_files:
@@ -81,114 +90,140 @@ with st.sidebar:
 
                 md_text = PP.get_markdown(file_path)
                 full_md_text.append(md_text)
-                with st.expander(f"Preview extracted text ({uploaded_file.name})"):
+
+                with st.expander(f"Preview - {uploaded_file.name}"):
                     st.markdown(md_text[:500] + "...")
 
-            pdf_processor_bar.progress(50, text="Text extracted. Chunking...")
+            pdf_processor_bar.progress(50, text="Chunking...")
             text_chunks = []
             for md_text in full_md_text:
                 text_chunks.extend(CK.chunk_text(md_text))
 
-            pdf_processor_bar.progress(75, text="Embedding...")
+            pdf_processor_bar.progress(70, text="Embedding chunks...")
             try:
                 EB.all_embeddings = EB.embed_chunks(text_chunks)
                 EB.chunks = text_chunks
-                pdf_processor_bar.progress(100, text="Embedding completed.")
+
+                pdf_processor_bar.progress(85, text="Building CCX index...")
+                CCX.build(text_chunks)
+
+                pdf_processor_bar.progress(100, text="Processing completed!")
                 st.session_state.embeddings_ready = True
-                st.success(f"Processed {len(uploaded_files)} file(s) into {len(text_chunks)} chunks.")
+
+                st.success(f"Processed {len(text_chunks)} chunks.")
             except Exception as e:
-                st.error(f"Error during embedding: {e}")
+                st.error(f"Error: {e}")
         else:
-            st.warning("Please upload at least one PDF file.")
+            st.warning("Upload at least one PDF file!")
 
 # -----------------------------------------
 # CHAT SECTION
 # -----------------------------------------
+st.subheader("💬 Ask a question about your documents")
 
-app_my_bar = st.progress(0, text=app_progress_text)
-
-if uploaded_files:
-    tabs = st.tabs([f.name for f in uploaded_files])
-    for i, (tab, uploaded_file) in enumerate(zip(tabs, uploaded_files)):
-        with tab:
-            file_path = os.path.join("uploads", uploaded_file.name)
-            st.pdf(file_path)
-
-st.subheader("💬 Chat with your PDF")
-
-# Retrieve all previous messages (preserving order)
 messages = st.session_state.CC.messages
-
-# Display previous messages in chronological order
 for msg in messages:
     with st.chat_message(msg["sender"]):
         st.markdown(msg["message"])
         st.caption(msg["timestamp"])
 
-# --- Input box at the bottom ---
-question = st.chat_input("Ask a question about your documents...")
+question = st.chat_input("Type a question...")
 
+# -----------------------------------------
+# ANSWER GENERATION
+# -----------------------------------------
 if question and not st.session_state.generating:
+
     if not st.session_state.embeddings_ready:
-        st.warning("Please upload and process PDF files first.")
-    else:
-        st.session_state.generating = True
-        st.session_state.CC.add_message(question, "user")
+        st.warning("Please upload & process PDFs first.")
+        st.stop()
 
-        chat_history = st.session_state.CC.get_formatted_context()
+    st.session_state.generating = True
+    st.session_state.CC.add_message(question, "user")
 
-        with st.chat_message("user"):
-            st.markdown(question)
+    chat_history = "" # temprory
 
-        with st.chat_message("assistant"):
-            response_placeholder = st.empty()
-            answer_text = ""
+    with st.chat_message("user"):
+        st.markdown(question)
 
-            LLM_answer_bar.progress(0, text="Embedding question...")
-            query_embedding = EB.get_user_query_embedding(question)
+    # --- Retrieval Phase ---
+    LLM_answer_bar.progress(20, text="Embedding query...")
+    query_embedding = EB.get_user_query_embedding(question)
 
-            LLM_answer_bar.progress(30, text="Retrieving relevant chunks...")
-            top_k_scores, top_k_texts = EB.get_similar_chunks(query_embedding, top_k=20)
-            final_context = "\n\n\n".join(top_k_texts)
+    LLM_answer_bar.progress(40, text="Retrieving RAG chunks...")
+    _, rag_chunks = EB.get_similar_chunks(query_embedding, top_k=5)
+    rag_context = "\n\n".join(rag_chunks)
 
-            LLM_answer_bar.progress(60, text="Generating response...")
-            prompt = f"""
-                    You are a friendly and intelligent AI assistant.
+    LLM_answer_bar.progress(55, text="Retrieving CCX chunks...")
+    ccx_context = CCX.generate("", question, k=5)
 
-                    You are given:
-                    - A user question.
-                    - Optional context extracted from uploaded documents.
+    # --- Build prompts ---
+    base_prompt = """
+You are a helpful AI assistant. Use the context below when appropriate.
 
-                    ---
+Rules:
+- If context helps, use it.
+- If unrelated, ignore it.
+- Keep explanations short & clean.
 
-                    ### Guidelines:
-                    1. If the question is conversational (like greetings, feelings, or casual chat), respond naturally and briefly as a person would.
-                    - Example: If asked "How are you?", reply like "I'm good! How about you?" instead of analyzing the context.
-                    2. If the question clearly relates to the provided context, use the context to give a correct and concise answer.
-                    3. If the question is unrelated to the context, ignore the context and answer normally using general knowledge.
-                    4. Keep your tone warm, simple, and human-like.
+Question: {question}
 
-                    ---
+Context:
+{context}
 
-                    **Question:** {question}
+Answer:
+"""
 
-                    **Context (optional):**
-                    {final_context}
+    rag_prompt = base_prompt.format(question=question, context=rag_context, history="")
+    ccx_prompt = base_prompt.format(question=question, context=ccx_context, history="")
+    hybrid_context = f"Semantic Context (RAG):\n{rag_context}\n\nLiteral Evidence (CCX):\n{ccx_context}"
+    hybrid_prompt = base_prompt.format(question=question, context=hybrid_context, history="")
 
-                    History until now
-                    {chat_history}                    
-                    ---
+    # logger.debug(f"{hybrid_context}")
 
-                    **Answer:**
-                    """
+    col_rag, col_ccx, col_hybrid = st.columns(3)
 
-            for chunk in DM.ask_query(prompt):
-                answer_text += chunk
-                response_placeholder.markdown(answer_text)
+    with col_rag:
+        st.markdown("### 🔵 RAG (Embedding-Based Answer)")
+        rag_placeholder = st.empty()
+        rag_text = ""
 
-            LLM_answer_bar.progress(100, text="Answer generated successfully!")
-            st.session_state.CC.add_message(answer_text, "assistant")
-            st.session_state.generating = False
+    with col_ccx:
+        st.markdown("### 🟠 CCX (Keyword Index Answer)")
+        ccx_placeholder = st.empty()
+        ccx_text = ""
+
+    with col_hybrid:
+        st.markdown("### 🟣 Hybrid (RAG + CCX)")
+        hybrid_placeholder = st.empty()
+        hybrid_text = ""
+
+
+    # --- Generate both answers ---
+    LLM_answer_bar.progress(70, text="Generating RAG answer...")
+    for chunk in DM.ask_query(rag_prompt[:200000]):
+        rag_text += chunk
+        rag_placeholder.markdown(rag_text)
+
+    LLM_answer_bar.progress(80, text="Generating CCX answer...")
+    for chunk in DM.ask_query(ccx_prompt[:200000]):
+        ccx_text += chunk
+        ccx_placeholder.markdown(ccx_text)
+
+    LLM_answer_bar.progress(90, text="Generating Hybrid answer...")
+    for chunk in DM.ask_query(hybrid_prompt[:200000]):
+        hybrid_text += chunk
+        hybrid_placeholder.markdown(hybrid_text)
+
+    LLM_answer_bar.progress(100, text="Done!")
+
+    st.session_state.CC.add_message(
+    f"**RAG Answer:**\n{rag_text}\n\n**CCX Answer:**\n{ccx_text}\n\n**Hybrid Answer:**\n{hybrid_text}",
+    "assistant"
+    )
+
+
+    st.session_state.generating = False
 
 else:
-    st.info("Upload PDFs to preview them in tabs.")
+    st.info("Upload PDFs and ask something!")
