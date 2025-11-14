@@ -10,36 +10,18 @@ class TreeNode:
         while p:
             level += 1
             p = p.parent
-
         return level
-
-    def get_parent_route(self):
-        route = []
-        p = self
-        while p:
-            route.append(p.data)
-            p = p.parent
-        return list(reversed(route))
 
     def print_tree(self):
         spaces = ' ' * self.get_level() * 3
         prefix = spaces + "|__" if self.parent else ""
         print(prefix + self.data)
-        if self.children:
-            for child in self.children:
-                child.print_tree()
+        for child in self.children:
+            child.print_tree()
 
     def add_child(self, child):
         child.parent = self
         self.children.append(child)
-
-    def search(self, key):
-        results = []
-        if self.data == key:
-            results.append(self.get_parent_route())
-        for child in self.children:
-            results.extend(child.search(key))
-        return results
 
     def get_child(self, name):
         for child in self.children:
@@ -54,30 +36,25 @@ class TreeNode:
             self.add_child(child)
         return child
 
-def build_product_tree():
-    root = TreeNode("Electronics")
+    # OLD: find only first match
+    def find_node_anywhere(self, keyword):
+        if self.data == keyword:
+            return self
+        for child in self.children:
+            found = child.find_node_anywhere(keyword)
+            if found:
+                return found
+        return None
 
-    laptop = TreeNode("Laptop")
-    laptop.add_child(TreeNode("Mac"))
-    laptop.add_child(TreeNode("Surface"))
-    laptop.add_child(TreeNode("Thinkpad"))
+    # NEW: find ALL nodes where node.data == keyword
+    def find_all_nodes_anywhere(self, keyword):
+        matches = []
+        queue = [self]
 
-    cellphone = TreeNode("Cell Phone")
-    cellphone.add_child(TreeNode("iPhone"))
-    cellphone.add_child(TreeNode("Google Pixel"))
-    cellphone.add_child(TreeNode("Vivo"))
-    cellphone.add_child(TreeNode("LG"))
+        while queue:
+            node = queue.pop(0)
+            if node.data == keyword:
+                matches.append(node)
+            queue.extend(node.children)
 
-    tv = TreeNode("TV")
-    tv.add_child(TreeNode("Samsung"))
-    tv.add_child(TreeNode("LG"))
-
-    root.add_child(laptop)
-    root.add_child(cellphone)
-    root.add_child(tv)
-
-    root.print_tree()
-    print(root.search("LG"))
-
-if __name__ == '__main__':
-    build_product_tree()
+        return matches
