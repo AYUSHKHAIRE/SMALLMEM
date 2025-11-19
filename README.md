@@ -1,5 +1,7 @@
 # SMALLMEM
 
+SMALLMEM is a language model evaluation and benchmarking framework enhanced with an `index memory layer` to improve `retrieval and contextual reasoning`. It evaluates `multiple models` on a diverse set of questions using both `quantitative metrics (BLEU, ROUGE, cosine similarity, TF-IDF)` and `qualitative judge metrics (creativity, coherence, factuality, completeness, clarity)`. The `index memory layer` enables models to `reference past interactions` or `document snippets` efficiently, `enhancing accuracy and context-awareness`. SMALLMEM also provides rich visualizations—bar charts, heatmaps, scatter plots, and latency analyses—highlighting performance, efficiency, and trade-offs across models. This makes it a `powerful tool` for analyzing `small or specialized LLMs` and `understanding how memory-augmented architectures` **impact response quality**.
+
 #Smallmem Evaluation Results
 | Observation Category   | Metric / Finding                           | Default                                     | RAG                                 | Index                                                                                       | Hybrid                                 |
 | ---------------------- | ------------------------------------------ | ------------------------------------------- | ----------------------------------- | ------------------------------------------------------------------------------------------- | -------------------------------------- |
