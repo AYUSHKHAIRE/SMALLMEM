@@ -12,8 +12,9 @@
 
 - Check [Analysis notebook link here](https://www.kaggle.com/code/ayushkhaire/smallmem-evaluation)
 
+## Project Structure
+
 ```sh
-Smallmem Project Structure
 ├── app.py
 ├── config
 │   └── logger_config.py
@@ -58,3 +59,10 @@ Smallmem Project Structure
     └── chapter_1.pdf
 ```
 
+## Results
+![Pasted image 2](img_results/Pasted%20image%20(2).png)  
+![Pasted image 3](img_results/Pasted%20image%20(3).png)  
+![Pasted image 4](img_results/Pasted%20image%20(4).png)  
+![Untitled design page 1](img_results/Untitled%20design%20(1)_page-0001%20(1).jpg)  
+![Untitled design pages 1](img_results/Untitled%20design_pages-to-jpg-0001%20(1).jpg)  
+![Untitled design pages 2](img_results/Untitled%20design_pages-to-jpg-0002.jpg)  
