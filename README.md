@@ -10,7 +10,7 @@
 | **Latency Efficiency** | General Efficiency Ranking                 | Most Efficient (Lowest Latency/Score ratio) | Generally Least Efficient           | Moderate Efficiency                                                                         | Low Efficiency                         |
 | **Latency Efficiency** | Trade-off                                  | Minimal latency cost for high performance   | High latency cost relative to score | Performance gains come with a moderate increase in latency relative to default              | Low score with noticeable latency cost |
 
-- Check [Analysis notebook link here[(https://www.kaggle.com/code/ayushkhaire/smallmem-evaluation)
+- Check [Analysis notebook link here](https://www.kaggle.com/code/ayushkhaire/smallmem-evaluation)
 
 ```sh
 Smallmem Project Structure
