@@ -2,4 +2,6 @@ qdrant_storage/
 uploads/
 venv/
 __pycache__/
+eval_*/
 *.pyc
+.env
