@@ -2,6 +2,18 @@
 
 SMALLMEM is a language model evaluation and benchmarking framework enhanced with an `index memory layer` to improve `retrieval and contextual reasoning`. It evaluates `multiple models` on a diverse set of questions using both `quantitative metrics (BLEU, ROUGE, cosine similarity, TF-IDF)` and `qualitative judge metrics (creativity, coherence, factuality, completeness, clarity)`. The `index memory layer` enables models to `reference past interactions` or `document snippets` efficiently, `enhancing accuracy and context-awareness`. SMALLMEM also provides rich visualizations—bar charts, heatmaps, scatter plots, and latency analyses—highlighting performance, efficiency, and trade-offs across models. This makes it a `powerful tool` for analyzing `small or specialized LLMs` and `understanding how memory-augmented architectures` **impact response quality**.
 
+## Features
+
+- A RAG system using quadrant and HuggingFace embedder `BAAI/bge-m3`
+- A tree-based, highly concentrated NLP text processing pipeline (context memory layer)
+- A hybrid approach combining both RAG and tree-based memory
+- Efficient preprocessing using `pymupdf4llm`
+- Models and quadrant running locally via Docker
+- Optimized performance with threading and multiprocessing
+- An evaluation script to test outputs using LLMs as judges and statistical methods
+- A web UI for interaction built with Streamlit
+- Convenient setup and stop shell scripts for easy execution
+
 ## Smallmem Evaluation Results
 | Observation Category   | Metric / Finding                           | Default                                     | RAG                                 | Index                                                                                       | Hybrid                                 |
 | ---------------------- | ------------------------------------------ | ------------------------------------------- | ----------------------------------- | ------------------------------------------------------------------------------------------- | -------------------------------------- |
@@ -60,6 +72,14 @@ SMALLMEM is a language model evaluation and benchmarking framework enhanced with
 └── uploads
     └── chapter_1.pdf
 ```
+
+### Pre-requisites
+
+- Python 3.12+
+- Virtual environment (recommended)
+- Docker 28.5.1+ (optional, for containerized execution)
+- NVIDIA GPU with CUDA 13 support (optional for accelerated inference)
+- Python libraries- view requirements.txt
 
 ## Results
 ![Pasted image 2](img_results/Pasted%20image%20(2).png)  
