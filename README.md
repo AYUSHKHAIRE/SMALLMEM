@@ -112,5 +112,5 @@ SMALLMEM is a language model evaluation and benchmarking framework enhanced with
 
 - **HuggingFace Embedder:** [BAAI/bge-m3](https://huggingface.co/BAAI/bge-m3)  
 - **Docker Models:** [Docker Hub / Local Models Setup](https://docs.docker.com/ai/model-runner/)
-- **Quadrant System:** [Quadrant Memory Layer Reference](https://qdrant.tech/)  
+- **Qdrant System:** [Qdrant vector DB](https://qdrant.tech/)  
 - **CUDA ( 13 )** [Need cuda toolkit 13](https://developer.nvidia.com/cuda-downloads)
