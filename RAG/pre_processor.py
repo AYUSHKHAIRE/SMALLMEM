@@ -5,8 +5,8 @@ class Chunker:
     def __init__(self):
         self.text_splitter = CharacterTextSplitter(
             separator="\n",
-            chunk_size=500,
-            chunk_overlap=100,
+            chunk_size=1000,
+            chunk_overlap=400,
             length_function=len,
         )
 
