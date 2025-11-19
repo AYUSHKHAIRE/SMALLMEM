@@ -2,6 +2,17 @@
 
 SMALLMEM is a language model evaluation and benchmarking framework enhanced with an `index memory layer` to improve `retrieval and contextual reasoning`. It evaluates `multiple models` on a diverse set of questions using both `quantitative metrics (BLEU, ROUGE, cosine similarity, TF-IDF)` and `qualitative judge metrics (creativity, coherence, factuality, completeness, clarity)`. The `index memory layer` enables models to `reference past interactions` or `document snippets` efficiently, `enhancing accuracy and context-awareness`. SMALLMEM also provides rich visualizations—bar charts, heatmaps, scatter plots, and latency analyses—highlighting performance, efficiency, and trade-offs across models. This makes it a `powerful tool` for analyzing `small or specialized LLMs` and `understanding how memory-augmented architectures` **impact response quality**.
 
+## Table of Contents
+
+- [Features](#features)
+- [Smallmem Evaluation Results](#smallmem-evaluation-results)
+- [Pre-requisites](#pre-requisites)
+- [Project Structure](#project-structure)
+- [Streamlit UI](#streamlit-ui-is-also-available)
+- [Results](#results)
+- [About and links](#project-structure)
+- [Resources](#resources)
+
 ## Features
 
 - A RAG system using quadrant and HuggingFace embedder `BAAI/bge-m3`
@@ -25,6 +36,14 @@ SMALLMEM is a language model evaluation and benchmarking framework enhanced with
 | **Latency Efficiency** | Trade-off                                  | Minimal latency cost for high performance   | High latency cost relative to score | Performance gains come with a moderate increase in latency relative to default              | Low score with noticeable latency cost |
 
 - Check [Analysis notebook link here](https://www.kaggle.com/code/ayushkhaire/smallmem-evaluation)
+
+### Pre-requisites
+
+- Python 3.12+
+- Virtual environment (recommended)
+- Docker 28.5.1+ (optional, for containerized execution)
+- NVIDIA GPU with CUDA 13 support (optional for accelerated inference)
+- Python libraries- view requirements.txt
 
 ## Project Structure
 
@@ -73,13 +92,8 @@ SMALLMEM is a language model evaluation and benchmarking framework enhanced with
     └── chapter_1.pdf
 ```
 
-### Pre-requisites
-
-- Python 3.12+
-- Virtual environment (recommended)
-- Docker 28.5.1+ (optional, for containerized execution)
-- NVIDIA GPU with CUDA 13 support (optional for accelerated inference)
-- Python libraries- view requirements.txt
+## streamlit UI is also available
+![Pasted image 2](img_results/screenshot.png)  
 
 ## Results
 ![Pasted image 2](img_results/Pasted%20image%20(2).png)  
@@ -89,5 +103,14 @@ SMALLMEM is a language model evaluation and benchmarking framework enhanced with
 ![Untitled design pages 1](img_results/Untitled%20design_pages-to-jpg-0001%20(1).jpg)  
 ![Untitled design pages 2](img_results/Untitled%20design_pages-to-jpg-0002.jpg)  
 
-## streamlit UI is also available
-![Pasted image 2](img_results/screenshot.png)  
+## About and links
+
+**Ayush Khaire**  
+[GitHub](https://github.com/AYUSHKHAIRE) | [LinkedIn](https://linkedin.com/in/ayushkhaire) | [Kaggle](https://kaggle.com/ayushkhaire)
+
+## Resources
+
+- **HuggingFace Embedder:** [BAAI/bge-m3](https://huggingface.co/BAAI/bge-m3)  
+- **Docker Models:** [Docker Hub / Local Models Setup](https://docs.docker.com/ai/model-runner/)
+- **Quadrant System:** [Quadrant Memory Layer Reference](https://qdrant.tech/)  
+- **CUDA ( 13 )** [Need cuda toolkit 13](https://developer.nvidia.com/cuda-downloads)
