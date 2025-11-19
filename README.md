@@ -68,3 +68,6 @@ SMALLMEM is a language model evaluation and benchmarking framework enhanced with
 ![Untitled design page 1](img_results/Untitled%20design%20(1)_page-0001%20(1).jpg)  
 ![Untitled design pages 1](img_results/Untitled%20design_pages-to-jpg-0001%20(1).jpg)  
 ![Untitled design pages 2](img_results/Untitled%20design_pages-to-jpg-0002.jpg)  
+
+## streamlit UI is also available
+![Pasted image 2](img_results/screenshot.png)  
