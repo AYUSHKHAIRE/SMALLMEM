@@ -99,5 +99,8 @@ class QdrantClientWrapper:
         """
         Deletes a collection permanently.
         """
-        self.client.delete_collection(collection_name=collection_name)
-        logger.info(f"Deleted collection: {collection_name}")
+        try:
+            self.client.delete_collection(collection_name=collection_name)
+            logger.info(f"Deleted collection: {collection_name}")
+        except Exception as e:
+            logger.error(f"{e}")
