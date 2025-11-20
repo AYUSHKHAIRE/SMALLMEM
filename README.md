@@ -13,6 +13,14 @@ SMALLMEM is a language model evaluation and benchmarking framework enhanced with
 - [About and links](#project-structure)
 - [Resources](#resources)
 
+## Demo
+
+![](smallmem-demo.gif)
+
+<!-- Fallback markdown link -->
+[Download / play the demo video](img_results/video-demo.mp4)
+
+
 ## Features
 
 - A RAG system using quadrant and HuggingFace embedder `BAAI/bge-m3`
