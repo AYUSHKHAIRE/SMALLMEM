@@ -15,7 +15,7 @@ SMALLMEM is a language model evaluation and benchmarking framework enhanced with
 
 ## Demo
 
-![](smallmem-demo.gif)
+![](img_results/smallmem-demo.gif)
 
 <!-- Fallback markdown link -->
 [Download / play the demo video](img_results/video-demo.mp4)
